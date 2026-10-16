@@ -20,6 +20,16 @@ interface ReporteDao {
     suspend fun obtenerTodos():
             List<ReporteEntity>
 
+    @Query(
+        "SELECT * FROM reportes WHERE categoria = :categoria"
+    )
+    suspend fun obtenerPorCategoria(categoria: String): List<ReporteEntity>
+
+    @Query(
+        "SELECT * FROM reportes WHERE estado = :estado"
+    )
+    suspend fun obtenerPorEstado(estado: String): List<ReporteEntity>
+
     @Update
     suspend fun actualizar(
         reporte: ReporteEntity

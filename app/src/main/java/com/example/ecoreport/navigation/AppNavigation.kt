@@ -2,6 +2,8 @@ package com.example.ecoreport.navigation
 
 import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.compose.*
 import com.example.ecoreport.data.ReporteEntity
 import com.example.ecoreport.repository.ReporteRepository
@@ -18,7 +20,13 @@ fun AppNavigation(
     val navController =
         rememberNavController()
 
-    val viewModel: ReporteViewModel = viewModel()
+    val viewModel: ReporteViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer {
+                ReporteViewModel(repository)
+            }
+        }
+    )
     val reportes =
         remember {
             mutableStateListOf<
@@ -117,7 +125,24 @@ fun AppNavigation(
 
             PantallaReportes(
                 reportes =
-                    viewModel.reportes,
+                    viewModel.reportesFiltrados,
+
+                categorias =
+                    viewModel.reportes
+                        .map { it.categoria }
+                        .distinct(),
+
+                estadoSeleccionado =
+                    viewModel.estadoSeleccionado,
+
+                categoriaSeleccionada =
+                    viewModel.categoriaSeleccionada,
+
+                filtrarPorEstado =
+                    viewModel::filtrarPorEstado,
+
+                filtrarPorCategoria =
+                    viewModel::filtrarPorCategoria,
 
                 seleccionarReporte = { reporte ->
 
