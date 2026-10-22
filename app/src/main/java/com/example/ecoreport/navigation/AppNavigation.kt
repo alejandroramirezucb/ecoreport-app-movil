@@ -45,6 +45,13 @@ fun AppNavigation(
     val reportes by viewModel.reportes
         .collectAsStateWithLifecycle()
 
+    val todos by viewModel.todos
+        .collectAsStateWithLifecycle()
+
+    val estadoSeleccionado by viewModel
+        .estadoSeleccionado
+        .collectAsStateWithLifecycle()
+
     var reporteSeleccionado by remember {
         mutableStateOf<ReporteEntity?>(null)
     }
@@ -61,7 +68,7 @@ fun AppNavigation(
         composable("inicio") {
 
             PantallaInicio(
-                reportes = reportes,
+                reportes = todos,
 
                 irRegistro = {
 
@@ -113,12 +120,11 @@ fun AppNavigation(
             PantallaReportes(
                 reportes = reportes,
 
+                estadoSeleccionado = estadoSeleccionado,
+
                 categoriaSeleccionada = categoriaSeleccionada,
 
-                seleccionarCategoria = {
-                    categoria ->
-                    viewModel.seleccionarCategoria(categoria)
-                },
+                aplicarFiltros = viewModel::aplicarFiltros,
 
                 seleccionarReporte = {
                         reporte ->
@@ -181,7 +187,7 @@ fun AppNavigation(
         composable("estadisticas") {
 
             PantallaEstadisticas(
-                reportes = reportes,
+                reportes = todos,
 
                 volver = {
 

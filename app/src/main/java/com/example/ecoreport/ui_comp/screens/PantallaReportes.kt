@@ -11,25 +11,48 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.ecoreport.data.ReporteEntity
 
+private val estadosFiltro = listOf(
+    "PENDIENTE" to "Pendiente",
+    "EN_PROCESO" to "En proceso",
+    "RESUELTO" to "Resuelto"
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaReportes(
     reportes: List<ReporteEntity>,
+    estadoSeleccionado: String?,
     categoriaSeleccionada: String?,
-    seleccionarCategoria: (ReporteEntity) -> Unit,
+    aplicarFiltros: (String?, String?) -> Unit,
     seleccionarReporte: (ReporteEntity) -> Unit,
     volver: () -> Unit
 ) {
+
+    var estadoElegido by remember { mutableStateOf(estadoSeleccionado) }
+    var categoriaEscrita by remember { mutableStateOf(categoriaSeleccionada ?: "") }
+    var menuAbierto by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -47,10 +70,89 @@ fun PantallaReportes(
             modifier = Modifier.height(16.dp)
         )
 
+        ExposedDropdownMenuBox(
+            expanded = menuAbierto,
+            onExpandedChange = { menuAbierto = it }
+        ) {
+
+            OutlinedTextField(
+                value = estadosFiltro
+                    .firstOrNull { it.first == estadoElegido }
+                    ?.second ?: "Todos",
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Estado") },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = menuAbierto)
+                },
+                modifier = Modifier
+                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                    .fillMaxWidth()
+            )
+
+            ExposedDropdownMenu(
+                expanded = menuAbierto,
+                onDismissRequest = { menuAbierto = false }
+            ) {
+
+                DropdownMenuItem(
+                    text = { Text("Todos") },
+                    onClick = {
+                        estadoElegido = null
+                        menuAbierto = false
+                    }
+                )
+
+                estadosFiltro.forEach { (valor, etiqueta) ->
+                    DropdownMenuItem(
+                        text = { Text(etiqueta) },
+                        onClick = {
+                            estadoElegido = valor
+                            menuAbierto = false
+                        }
+                    )
+                }
+            }
+        }
+
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
+
+        OutlinedTextField(
+            value = categoriaEscrita,
+            onValueChange = { categoriaEscrita = it },
+            label = { Text("Categoría") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
+
+        Button(
+            onClick = { aplicarFiltros(estadoElegido, categoriaEscrita) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+
+            Text(
+                text = "FILTRAR"
+            )
+        }
+
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
+
         if (reportes.isEmpty()) {
 
             Text(
-                text = "No existen reportes registrados."
+                text = if (estadoSeleccionado != null || categoriaSeleccionada != null) {
+                    "No hay reportes con ese filtro."
+                } else {
+                    "No existen reportes registrados."
+                }
             )
 
         } else {

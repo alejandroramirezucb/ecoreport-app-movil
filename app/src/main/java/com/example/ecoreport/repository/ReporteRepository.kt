@@ -18,6 +18,14 @@ class ReporteRepository (
         return reporteDao.obtenerPorCategoria(categoria)
     }
 
+    fun obtenerFiltrados(
+        estado: String?,
+        categoria: String?
+    ):
+            Flow<List<ReporteEntity>> {
+        return reporteDao.obtenerFiltrados(estado, categoria)
+    }
+
     suspend fun insertar(reporte: ReporteEntity){
         reporteDao.insertar(reporte)
     }

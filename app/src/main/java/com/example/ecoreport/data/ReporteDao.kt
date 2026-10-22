@@ -34,6 +34,21 @@ interface ReporteDao {
     ):
             Flow<List<ReporteEntity>>
 
+    @Query(
+        """
+            SELECT *
+            FROM reportes
+            WHERE (:estado IS NULL OR estado = :estado)
+            AND (:categoria IS NULL OR categoria LIKE '%' || :categoria || '%')
+            ORDER BY id DESC
+        """
+    )
+    fun obtenerFiltrados(
+        estado: String?,
+        categoria: String?
+    ):
+            Flow<List<ReporteEntity>>
+
     @Update
     suspend fun actualizar(
         reporte: ReporteEntity

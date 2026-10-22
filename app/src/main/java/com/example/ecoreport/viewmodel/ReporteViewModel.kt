@@ -1,6 +1,5 @@
 package com.example.ecoreport.viewmodel
 
-import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ecoreport.data.ReporteEntity
@@ -9,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -17,16 +17,15 @@ class ReporteViewModel (
     private val repository: ReporteRepository
 ): ViewModel() {
 
+    private val _estadoSeleccionado = MutableStateFlow<String?>(null)
     private val _categoriaSeleccionada = MutableStateFlow<String?>(null)
 
+    val estadoSeleccionado: StateFlow<String?> = _estadoSeleccionado
     val categoriaSeleccionada: StateFlow<String?> = _categoriaSeleccionada
-    val reportes:
+
+    val todos:
     StateFlow<List<ReporteEntity>> =
-        _categoriaSeleccionada
-            .flatMapLatest {
-                categoria ->
-                repository.obtenerPorCategoria(categoria)
-            }
+        repository.obtenerTodos()
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted
@@ -34,7 +33,23 @@ class ReporteViewModel (
                 initialValue = emptyList()
             )
 
-
+    val reportes:
+    StateFlow<List<ReporteEntity>> =
+        combine(
+            _estadoSeleccionado,
+            _categoriaSeleccionada
+        ) { estado, categoria ->
+            estado to categoria
+        }
+            .flatMapLatest { (estado, categoria) ->
+                repository.obtenerFiltrados(estado, categoria)
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted
+                    .WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
 
     fun insertar(reporte: ReporteEntity) {
         viewModelScope.launch {
@@ -54,7 +69,8 @@ class ReporteViewModel (
         }
     }
 
-    fun seleccionarCategoria(categoria: String?) {
-        _categoriaSeleccionada.value = categoria
+    fun aplicarFiltros(estado: String?, categoria: String?) {
+        _estadoSeleccionado.value = estado
+        _categoriaSeleccionada.value = categoria?.trim()?.ifEmpty { null }
     }
 }
