@@ -1,6 +1,7 @@
 package com.example.ecoreport.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,6 +17,7 @@ import com.example.ecoreport.ui_comp.screens.PantallaDetalle
 import com.example.ecoreport.ui_comp.screens.PantallaEstadisticas
 import com.example.ecoreport.ui_comp.screens.PantallaRegistro
 import com.example.ecoreport.ui_comp.screens.PantallaReportes
+import com.example.ecoreport.ui_comp.screens.PantallaReportesRemotos
 import com.example.ecoreport.ui_comp.screens.PantallaInicio
 import com.example.ecoreport.viewmodel.ReporteViewModel
 import com.example.ecoreport.viewmodel.ReporteViewModelFactory
@@ -53,6 +55,15 @@ fun AppNavigation(
         .categoriaSeleccionada
         .collectAsStateWithLifecycle()
 
+    val reportesRemotos by viewModel.reportesRemotos
+        .collectAsStateWithLifecycle()
+
+    val cargando by viewModel.cargando
+        .collectAsStateWithLifecycle()
+
+    val error by viewModel.error
+        .collectAsStateWithLifecycle()
+
     NavHost(
         navController = navController,
         startDestination = "inicio"
@@ -81,6 +92,13 @@ fun AppNavigation(
 
                     navController.navigate(
                         "estadisticas"
+                    )
+                },
+
+                irReportesRemotos = {
+
+                    navController.navigate(
+                        "reportesRemotos"
                     )
                 }
             )
@@ -130,6 +148,27 @@ fun AppNavigation(
                         "detalle"
                     )
                 },
+
+                volver = {
+
+                    navController
+                        .popBackStack()
+                }
+            )
+        }
+
+        composable("reportesRemotos") {
+
+            LaunchedEffect(Unit) {
+                viewModel.cargarReportesRemotos()
+            }
+
+            PantallaReportesRemotos(
+                reportes = reportesRemotos,
+
+                cargando = cargando,
+
+                error = error,
 
                 volver = {
 

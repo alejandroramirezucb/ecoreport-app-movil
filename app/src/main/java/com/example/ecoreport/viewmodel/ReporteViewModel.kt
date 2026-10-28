@@ -21,6 +21,7 @@ class ReporteViewModel (
     private val _categoriaSeleccionada = MutableStateFlow<String?>(null)
 
     private val _reportesRemotos = MutableStateFlow<List<ReporteDto>>(emptyList())
+    val reportesRemotos: StateFlow<List<ReporteDto>> = _reportesRemotos
     private val _cargando = MutableStateFlow(false)
     val cargando: StateFlow<Boolean> = _cargando
 
@@ -59,6 +60,20 @@ class ReporteViewModel (
     fun actualizar(reporte: ReporteEntity) {
         viewModelScope.launch {
             repository.actualizar(reporte)
+        }
+    }
+
+    fun cargarReportesRemotos() {
+        viewModelScope.launch {
+            _cargando.value = true
+            _error.value = null
+            try {
+                _reportesRemotos.value = repository.obtenerReportesRemotos()
+            } catch (e: Exception) {
+                _error.value = e.message ?: "No se pudo consultar la API"
+            } finally {
+                _cargando.value = false
+            }
         }
     }
 
