@@ -238,6 +238,55 @@ fun AppNavigation(
                 error =
                     error,
 
+                crearReporte = {
+                        titulo,
+                        descripcion,
+                        categoria,
+                        ubicacion,
+                        estado,
+                        fecha ->
+
+                    viewModel
+                        .crearNuevoReporteRemoto(
+                            titulo,
+                            descripcion,
+                            categoria,
+                            ubicacion,
+                            estado,
+                            fecha
+                        )
+                },
+
+                editarReporte = {
+                        id,
+                        titulo,
+                        descripcion,
+                        categoria,
+                        ubicacion,
+                        estado,
+                        fecha ->
+
+                    viewModel
+                        .editarReporteRemoto(
+                            id,
+                            titulo,
+                            descripcion,
+                            categoria,
+                            ubicacion,
+                            estado,
+                            fecha
+                        )
+                },
+
+                eliminarReporte = {
+                        id ->
+
+                    viewModel
+                        .eliminarReporteRemoto(
+                            id
+                        )
+                },
+
                 volver = {
 
                     navController

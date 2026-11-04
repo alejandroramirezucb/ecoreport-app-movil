@@ -120,5 +120,56 @@ class ReporteViewModel (
         }
     }
 
+    fun editarReporteRemoto(
+        id: Int,
+        titulo: String,
+        descripcion: String,
+        categoria: String,
+        ubicacion: String,
+        estado: String,
+        fecha: String
+    ) {
+        viewModelScope.launch {
+            _cargando.value = true
 
+            _error.value = null
+
+            try {
+                val reporte = CrearReporteDto(
+                    titulo,
+                    descripcion,
+                    categoria,
+                    ubicacion,
+                    estado,
+                    fecha
+                )
+
+                repository.editarReporte(id, reporte)
+                cargarReportesRemotos()
+            } catch (e: Exception) {
+                _error.value = "Hubo un error al momento de editar el registro, por favor comuniquese con soporte"
+            } finally {
+                _cargando.value = false
+            }
+        }
+    }
+
+    fun eliminarReporteRemoto(
+        id: Int
+    ) {
+        viewModelScope.launch {
+            _cargando.value = true
+
+            _error.value = null
+
+            try {
+                repository.eliminarReporte(id)
+                cargarReportesRemotos()
+            } catch (e: Exception) {
+                _error.value = "Hubo un error al momento de eliminar el registro, por favor comuniquese con soporte"
+            } finally {
+                _cargando.value = false
+            }
+        }
+    }
 }
